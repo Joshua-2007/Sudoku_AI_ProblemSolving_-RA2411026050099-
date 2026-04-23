@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sudoku Solver</title>
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #1e1e2f;
+    color: white;
+}
+table {
+    margin: auto;
+    border-collapse: collapse;
+}
+td {
+    border: 1px solid white;
+}
+input {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    font-size: 18px;
+}
+button {
+    margin: 10px;
+    padding: 10px;
+    font-size: 16px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Sudoku Solver</h2>
+
+<table id="grid"></table>
+
+<button onclick="check()">Check</button>
+<button onclick="solve()">Solve</button>
+
+<script>
+let puzzle = [
+[5,3,0,0,7,0,0,0,0],
+[6,0,0,1,9,5,0,0,0],
+[0,9,8,0,0,0,0,6,0],
+[8,0,0,0,6,0,0,0,3],
+[4,0,0,8,0,3,0,0,1],
+[7,0,0,0,2,0,0,0,6],
+[0,6,0,0,0,0,2,8,0],
+[0,0,0,4,1,9,0,0,5],
+[0,0,0,0,8,0,0,7,9]
+];
+
+let grid = document.getElementById("grid");
+
+for(let i=0;i<9;i++){
+    let row = grid.insertRow();
+    for(let j=0;j<9;j++){
+        let cell = row.insertCell();
+        let input = document.createElement("input");
+
+        if(puzzle[i][j] !== 0){
+            input.value = puzzle[i][j];
+            input.disabled = true;
+            input.style.background = "#ccc";
+        }
+
+        cell.appendChild(input);
+    }
+}
+
+function getBoard(){
+    let board = [];
+    for(let i=0;i<9;i++){
+        let row = [];
+        for(let j=0;j<9;j++){
+            let val = grid.rows[i].cells[j].firstChild.value;
+            row.push(val ? parseInt(val) : 0);
+        }
+        board.push(row);
+    }
+    return board;
+}
+
+function isValid(board, r, c, num){
+    for(let i=0;i<9;i++){
+        if(board[r][i]===num || board[i][c]===num) return false;
+    }
+
+    let sr = Math.floor(r/3)*3;
+    let sc = Math.floor(c/3)*3;
+
+    for(let i=0;i<3;i++){
+        for(let j=0;j<3;j++){
+            if(board[sr+i][sc+j]===num) return false;
+        }
+    }
+    return true;
+}
+
+function solveSudoku(board){
+    for(let i=0;i<9;i++){
+        for(let j=0;j<9;j++){
+            if(board[i][j]===0){
+                for(let n=1;n<=9;n++){
+                    if(isValid(board,i,j,n)){
+                        board[i][j]=n;
+                        if(solveSudoku(board)) return true;
+                        board[i][j]=0;
+                    }
+                }
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function solve(){
+    let board = getBoard();
+    if(solveSudoku(board)){
+        for(let i=0;i<9;i++){
+            for(let j=0;j<9;j++){
+                grid.rows[i].cells[j].firstChild.value = board[i][j];
+            }
+        }
+        alert("Solved!");
+    } else {
+        alert("No solution");
+    }
+}
+
+function check(){
+    let board = getBoard();
+    for(let i=0;i<9;i++){
+        let set = new Set(board[i].filter(x=>x!==0));
+        if(set.size !== board[i].filter(x=>x!==0).length){
+            alert("Wrong!");
+            return;
+        }
+    }
+    alert("Looks good!");
+}
+</script>
+
+</body>
+</html>
